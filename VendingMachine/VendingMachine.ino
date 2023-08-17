@@ -43,6 +43,9 @@
 #define LED_W 33
 #define LED_Card 31
 
+// Sensor foto elétrico
+#define SENSOR 29
+
 // Tempo Entre Passos
 int millisBtwnSteps = 9000; 
 const int stepsPerRev=200;
@@ -53,8 +56,25 @@ int i = 0;
 int timer = 0;
 bool pressed = false;
 bool card = false;
+bool sensor = false;
+bool sensorPressed = false;
 
 // functions
+bool waitSensor(){
+  timer = 0;
+  sensorPressed = false;
+  
+  while(timer < 15000){
+    delay(1);
+    timer += 1;
+    if(digitalRead(SENSOR) == 0){
+      sensorPressed = true;
+      break; // revisar, sair do while
+    }
+  }
+  return pressed;
+}
+
 bool waitCard(){
   // Espera a leitura do botão  
   timer = 0;
@@ -77,7 +97,7 @@ bool waitCard(){
 void button(int direc, int step , int enable, int led){
  
     digitalWrite(led, HIGH);
- 
+    sensor = false;
     card = false;
     card = waitCard();
 
@@ -85,6 +105,11 @@ void button(int direc, int step , int enable, int led){
       girar(direc, step, enable);
     }
     card = false;
+
+    while(sensor == false){
+      sensor = waitSensor();
+    }
+
     digitalWrite(led, LOW);
 }
 
@@ -143,6 +168,7 @@ void setup() {
   pinMode(BUTTON_Z, INPUT);
   pinMode(BUTTON_W, INPUT);
   pinMode(BUTTON_Card, INPUT);
+  pinMode(SENSOR, INPUT);
 
   digitalWrite(X_enable, LOW);
   digitalWrite(Y_enable, LOW);
